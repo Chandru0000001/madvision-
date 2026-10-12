@@ -2,45 +2,45 @@
   "employees": [
     {
       "id": 1,
-      "name": "Alice Johnson",
+      "name": "cs",
       "department": "Engineering",
       "role": "Software Engineer",
-      "email": "alice.johnson@example.com"
+      "email": "cs.johnson@example.com"
     },
     {
       "id": 2,
-      "name": "Brian Smith",
+      "name": "pk",
       "department": "Marketing",
       "role": "Marketing Specialist",
-      "email": "brian.smith@example.com"
+      "email": "pk.smith@example.com"
     },
     {
       "id": 3,
-      "name": "Carol Lee",
+      "name": "nr",
       "department": "HR",
       "role": "HR Manager",
-      "email": "carol.lee@example.com"
+      "email": "nr.lee@example.com"
     }
   ],
   "tasks": [
     {
       "taskId": 101,
       "title": "Website Redesign",
-      "assignee": "Alice Johnson",
+      "assignee": "cs",
       "status": "In Progress",
       "priority": "High"
     },
     {
       "taskId": 102,
       "title": "Campaign Launch",
-      "assignee": "Brian Smith",
+      "assignee": "pk",
       "status": "Pending",
       "priority": "Medium"
     },
     {
       "taskId": 103,
       "title": "Employee Onboarding",
-      "assignee": "Carol Lee",
+      "assignee": "nr",
       "status": "Completed",
       "priority": "Low"
     }
