@@ -1,18 +1,14 @@
 import json
 from pathlib import Path
 
-# Get the current Python file's folder
 folder_path = Path(__file__).parent
 
-# Locate the JSON file
 json_file = folder_path / "employees.json"
 
-# Read the JSON file
 with open(json_file, "r", encoding="utf-8") as file:
     data = json.load(file)
 
 
-# Display Employee Records
 print("\n========== EMPLOYEE RECORDS ==========\n")
 
 for employee in data["employees"]:
@@ -24,7 +20,6 @@ for employee in data["employees"]:
     print("-------------------------------------")
 
 
-# Display Task Records
 print("\n========== TASK RECORDS ==========\n")
 
 for task in data["tasks"]:
