@@ -1,0 +1,28 @@
+{
+    "employees": {
+        "total_employees": 3,
+        "employees_by_department": {
+            "Engineering": 1,
+            "Marketing": 1,
+            "HR": 1
+        }
+    },
+    "tasks": {
+        "total_tasks": 3,
+        "tasks_by_status": {
+            "In Progress": 1,
+            "Pending": 1,
+            "Completed": 1
+        },
+        "tasks_by_priority": {
+            "High": 1,
+            "Medium": 1,
+            "Low": 1
+        },
+        "tasks_by_assignee": {
+            "cs": 1,
+            "pk": 1,
+            "nr": 1
+        }
+    }
+}

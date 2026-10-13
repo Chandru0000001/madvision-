@@ -9,7 +9,7 @@ with open(json_file, "r", encoding="utf-8") as file:
     data = json.load(file)
 
 
-print("\n========== EMPLOYEE RECORDS ==========\n")
+print("\n********* EMPLOYEE RECORDS *********\n")
 
 for employee in data["employees"]:
     print("Employee ID:", employee["id"])
@@ -17,7 +17,6 @@ for employee in data["employees"]:
     print("Department:", employee["department"])
     print("Role:", employee["role"])
     print("Email:", employee["email"])
-    print("-------------------------------------")
 
 
 print("\n========== TASK RECORDS ==========\n")
@@ -28,4 +27,3 @@ for task in data["tasks"]:
     print("Assignee:", task["assignee"])
     print("Status:", task["status"])
     print("Priority:", task["priority"])
-    print("-------------------------------------")
