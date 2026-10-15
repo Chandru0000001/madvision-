@@ -4,7 +4,7 @@
 
 This project is a simple Task Management REST API developed using Python and FastAPI.
 
-It allows users to retrieve tasks, create new tasks, retrieve individual tasks, and validate incoming data.
+The API supports retrieving tasks, creating new tasks, retrieving an individual task, validating incoming data, and returning useful error messages.
 
 ## 2. Technologies Used
 
@@ -21,109 +21,70 @@ It allows users to retrieve tasks, create new tasks, retrieve individual tasks, 
 fastapi_project/
 ├── venv/
 ├── main.py
-└── README.md
+├── README.md
+├── requirements.txt
+└── .gitignore
 ```
 
-## 4. Requirements
+## 4. Installation
 
-Install Python and Visual Studio Code.
+Open the project folder in VS Code and open the terminal.
 
-The project uses a Python virtual environment to manage its dependencies.
-
-## 5. Installation and Setup
-
-### Step 1: Open the project directory
-
-Open the VS Code terminal and run:
+Navigate to the project directory:
 
 ```powershell
 cd "C:\Users\chand\OneDrive\Desktop\madvision project\fastapi_project"
 ```
 
-### Step 2: Create a virtual environment (if needed)
-
-If you have not created a virtual environment for this project, run:
-
-```powershell
-python -m venv venv
-```
-
-If the virtual environment already exists, skip this command.
-
-### Step 3: Activate the virtual environment
-
-On Windows PowerShell, run:
+Activate the virtual environment:
 
 ```powershell
 .\venv\Scripts\Activate.ps1
 ```
 
-If the environment is already active, skip this command.
+If the virtual environment is already active, skip this command.
 
-### Step 4: Install dependencies
-
-Run:
+Install the dependencies:
 
 ```powershell
-python -m pip install "fastapi[standard]"
+python -m pip install -r requirements.txt
 ```
 
-## 6. Run the API
+## 5. Run the Application
 
-Start the development server using:
+Run:
 
 ```powershell
 fastapi dev main.py
 ```
 
-The API will usually be available at:
+The API will usually run at:
 
 http://127.0.0.1:8000
 
-Keep the terminal running while testing the API.
-
-## 7. API Endpoints
-
-| HTTP Method | Endpoint      | Description           |
-| ----------- | ------------- | --------------------- |
-| GET         | `/tasks`      | Retrieve all tasks    |
-| POST        | `/tasks`      | Create a new task     |
-| GET         | `/tasks/{id}` | Retrieve a task by ID |
-
-## 8. Test the API
-
-FastAPI automatically generates interactive API documentation.
+## 6. Interactive API Documentation
 
 Open the following address in your browser:
 
 http://127.0.0.1:8000/docs
 
-### Test 1: Retrieve all tasks
+Use Swagger UI to execute requests and inspect responses.
+
+## 7. API Endpoints
+
+| Method | Endpoint    | Description           |
+| ------ | ----------- | --------------------- |
+| GET    | /tasks      | Retrieve all tasks    |
+| POST   | /tasks      | Create a new task     |
+| GET    | /tasks/{id} | Retrieve a task by ID |
+
+## 8. Create a Task
 
 Endpoint:
 
-```http
-GET /tasks
-```
-
-Steps:
-
-1. Open Swagger UI.
-2. Expand `GET /tasks`.
-3. Click **Try it out**.
-4. Click **Execute**.
-
-Expected result: `200 OK`.
-
-### Test 2: Create a task
-
-Endpoint:
-
-```http
 POST /tasks
-```
 
-Example request body:
+Example request:
 
 ```json
 {
@@ -133,113 +94,60 @@ Example request body:
 }
 ```
 
-Steps:
+Expected status code: 201 Created.
 
-1. Expand `POST /tasks`.
-2. Click **Try it out**.
-3. Enter the JSON request body.
-4. Click **Execute**.
-
-Expected result: `201 Created`.
-
-### Test 3: Retrieve one task
+## 9. Retrieve All Tasks
 
 Endpoint:
 
-```http
+GET /tasks
+
+Expected status code: 200 OK.
+
+## 10. Retrieve One Task
+
+Endpoint:
+
 GET /tasks/1
-```
 
-Steps:
+Expected status code: 200 OK if the task exists.
 
-1. Expand `GET /tasks/{id}`.
-2. Click **Try it out**.
-3. Enter `1` as the ID.
-4. Click **Execute**.
+If the task does not exist, the API returns 404 Not Found.
 
-Expected result: `200 OK` if task ID 1 exists.
-
-## 9. Error Handling and Validation
-
-The API validates incoming task data using Pydantic.
-
-The task model applies these rules:
+## 11. Validation Rules
 
 * Task ID must be an integer greater than zero.
 * Task title must contain between 3 and 100 characters.
-* The completion status must be Boolean.
-* The completion status defaults to `false` if omitted.
+* Completion status must be Boolean.
+* Completion status defaults to false.
+* Duplicate task IDs are not allowed.
 
-The API also checks for duplicate task IDs.
+## 12. Error Handling
 
-### Supported error responses
+| Status Code | Meaning              |
+| ----------- | -------------------- |
+| 200         | Request successful   |
+| 201         | Task created         |
+| 404         | Task not found       |
+| 409         | Duplicate task ID    |
+| 422         | Invalid request data |
 
-| Status Code | Description            |
-| ----------- | ---------------------- |
-| 404         | Task not found         |
-| 409         | Task ID already exists |
-| 422         | Invalid request data   |
+## 13. Limitations
 
-### Example: Task not found
+Tasks are currently stored in a Python list.
 
-Request:
+The data is not saved permanently and resets when the application restarts.
 
-```http
-GET /tasks/100
-```
+A database can be added in a future version.
 
-Example response:
+## 14. Future Improvements
 
-```json
-{
-  "detail": "Task with ID 100 was not found"
-}
-```
-
-### Example: Duplicate task ID
-
-If you try to create a task using an existing ID, the API returns:
-
-```json
-{
-  "detail": "Task with ID 1 already exists"
-}
-```
-
-The status code is `409 Conflict`.
-
-### Example: Invalid title
-
-Request:
-
-```json
-{
-  "id": 3,
-  "title": "Hi",
-  "completed": false
-}
-```
-
-The API returns `422 Unprocessable Entity` because the title is shorter than three characters.
-
-## 10. Important Notes
-
-* Tasks are currently stored in an in-memory Python list.
-* Task data is not permanently stored in a database.
-* Tasks reset to their initial values when the application restarts.
-* Task IDs must be unique.
-* The development server should remain running during testing.
-
-## 11. Future Improvements
-
-Possible improvements include:
-
-* Add a PUT endpoint to update tasks.
-* Add a DELETE endpoint to remove tasks.
-* Store tasks in a database such as SQLite or PostgreSQL.
+* Update tasks using PUT.
+* Delete tasks using DELETE.
+* Store tasks in a database.
 * Add automated tests using pytest.
-* Add authentication and authorization.
+* Add user authentication.
 
-## 12. Conclusion
+## 15. Conclusion
 
-This project demonstrates the basics of building a REST API using FastAPI, defining data models with Pydantic, handling errors, and testing endpoints using Swagger UI.
+This project demonstrates REST API development, request validation, error handling, and interactive API testing using FastAPI.
