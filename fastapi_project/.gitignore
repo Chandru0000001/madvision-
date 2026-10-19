@@ -1,16 +1,13 @@
-# Virtual environments
+# Python virtual environment
 venv/
 .venv/
 
-# Python cache
+# Python cache files
 __pycache__/
-*.py[cod]
+*.pyc
 
 # Environment variables
 .env
 
-# Testing cache
+# FastAPI
 .pytest_cache/
-
-# VS Code settings
-.vscode/
