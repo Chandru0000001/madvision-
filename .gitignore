@@ -1,5 +1,6 @@
 .env
 chroma_db/
+chunk_embeddings.json
 __pycache__/
 *.pyc
 .venv/
