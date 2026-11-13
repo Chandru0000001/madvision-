@@ -1,0 +1,64 @@
+ FastAPI Notes
+ 
+## What Is FastAPI
+FastAPI is a modern Python web framework for building APIs. It is built on Starlette (web layer) and Pydantic (data validation). It uses Python type hints to validate input, convert types and generate interactive API documentation automatically.
+ 
+## Install and Run
+Install with pip install "fastapi[standard]" (or fastapi and uvicorn separately). Run the development server with fastapi dev main.py or uvicorn main:app --reload. Interactive docs appear at /docs (Swagger UI) and /redoc.
+ 
+## Minimal App
+from fastapi import FastAPI
+app = FastAPI()
+ 
+@app.get("/")
+def root():
+    return {"message": "Hello"}
+ 
+## Path and Query Parameters
+A path parameter is part of the URL: @app.get("/items/{item_id}") with def read(item_id: int). A query parameter is any function argument that is not in the path: def read(skip: int = 0, limit: int = 10) handles /items?skip=5&limit=20. An argument with a default is optional. Invalid types return a 422 error automatically.
+ 
+## Request Bodies with Pydantic
+Define a model by subclassing BaseModel:
+class Item(BaseModel):
+    name: str
+    price: float
+    in_stock: bool = True
+ 
+@app.post("/items")
+def create(item: Item):
+    return item
+ 
+FastAPI reads the JSON body, validates it against Item and returns a clear 422 response if it is wrong. Use response_model=Item on the decorator to control and filter what is returned.
+ 
+## HTTP Methods
+GET reads data, POST creates, PUT replaces, PATCH partly updates, DELETE removes. Use status_code=201 for created resources. Raise errors with raise HTTPException(status_code=404, detail="Item not found").
+ 
+## Async vs Sync
+Define an endpoint with async def when it awaits non-blocking I/O (async database drivers, HTTP clients). Use a plain def for blocking code; FastAPI runs it in a thread pool so it does not block the event loop. Do not call blocking code inside async def.
+ 
+## Dependency Injection
+Depends() lets you share logic such as database sessions, authentication and common parameters.
+def get_db():
+    db = Session()
+    try:
+        yield db
+    finally:
+        db.close()
+ 
+@app.get("/users")
+def users(db = Depends(get_db)):
+    ...
+Dependencies can depend on other dependencies and are easy to override in tests.
+ 
+## Authentication and Security
+FastAPI includes helpers for OAuth2 password flow, bearer tokens and API keys in fastapi.security. A common pattern is to issue a JWT at login and read it in a dependency that returns the current user. Always hash passwords (for example with bcrypt or argon2) and serve over HTTPS.
+ 
+## Middleware, CORS and Background Tasks
+Add CORSMiddleware to allow browser apps from other origins to call the API. BackgroundTasks runs small jobs (such as sending an email) after the response is returned. Use a task queue such as Celery for heavy or long-running work.
+ 
+## Project Structure and Testing
+Split large apps with APIRouter and include them with app.include_router(). Keep models, schemas, routers and dependencies in separate modules. Test with TestClient from fastapi.testclient and pytest. Deploy with uvicorn or gunicorn using uvicorn workers, usually behind a reverse proxy in a container.
+ 
+## Serving an ML Model
+Load the model once at startup (for example in a lifespan handler), not on every request. Accept features in a Pydantic model, call model.predict inside the endpoint and return the result as JSON.
+ 

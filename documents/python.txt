@@ -1,0 +1,42 @@
+# Python Notes
+
+Python is a high-level programming language.
+
+Python is used for web development, artificial intelligence,
+machine learning, automation and data analysis.
+
+Python is also used for scripting and software development.
+
+Popular Python frameworks include Django, Flask and FastAPI.
+ 
+## Basics
+Python is a dynamically typed, interpreted language. Indentation defines code blocks. Everything is an object, and variables are names that point to objects.
+Common built-in types: int, float, str, bool, list, tuple, dict, set, None.
+ 
+## Lists, Tuples, Sets and Dictionaries
+A list is an ordered, mutable sequence: [1, 2, 3]. A tuple is an ordered, immutable sequence: (1, 2, 3). A set is an unordered collection of unique items: {1, 2, 3}. A dict maps keys to values: {"name": "Asha"}. Dict keys must be hashable, so lists cannot be keys but tuples of immutable items can.
+ 
+## Comprehensions
+List comprehension: [x * x for x in range(10) if x % 2 == 0]. Dict comprehension: {k: v for k, v in pairs}. Generator expression: (x * x for x in range(10)). It is lazy and uses very little memory.
+ 
+## Functions
+Functions are defined with def. They support default arguments, *args for extra positional arguments and **kwargs for extra keyword arguments. Never use a mutable default such as def f(x=[]), because the default is created once and shared between calls. Use None and create the list inside the function.
+ 
+## Decorators and Generators
+A decorator is a function that takes a function and returns a new function, applied with the @name syntax. Use functools.wraps to keep the original function's name and docstring. A generator is a function that uses yield. It produces values one at a time and keeps its state between calls.
+ 
+## Classes
+Classes are defined with class. __init__ initializes an instance, and self is the instance. Special methods such as __repr__, __str__, __eq__ and __len__ customize behavior. A dataclass (from dataclasses import dataclass) generates __init__, __repr__ and __eq__ automatically. Inheritance is written class Child(Parent), and super() calls the parent's method.
+ 
+## Error Handling
+Use try / except / else / finally. Catch specific exceptions, not a bare except. Raise errors with raise ValueError("message"). A context manager (with open(path) as f) guarantees cleanup even when an error happens.
+ 
+## Modules and Environments
+Import with import module or from module import name. A virtual environment isolates a project's packages: python -m venv .venv, then activate it and run pip install package. Pin versions in requirements.txt.
+ 
+## Concurrency
+The GIL (Global Interpreter Lock) lets only one thread run Python bytecode at a time. Use threads for I/O-bound work, multiprocessing for CPU-bound work, and asyncio (async / await) for many concurrent I/O tasks such as network calls.
+ 
+## Useful Tips
+Use f-strings for formatting: f"{name} is {age}". Use enumerate() to get an index and zip() to loop over several sequences. Use pathlib.Path instead of string paths. Use is to compare with None and == to compare values.
+ 
