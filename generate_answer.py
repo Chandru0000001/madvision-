@@ -1,10 +1,11 @@
 import os
 import time
 
-import chromadb
 from dotenv import load_dotenv
 from google import genai
-from google.genai import types
+
+from logger_config import logger
+from output_validator import validate_output
 
 
 # STEP 1: Load Gemini API key
@@ -22,152 +23,110 @@ if not api_key:
 client = genai.Client(api_key=api_key)
 
 
-# STEP 3: Connect to ChromaDB
+# STEP 3: Create answer generation function
 
-chroma_client = chromadb.PersistentClient(
-    path="./chroma_db"
-)
+def generate_answer(question, retrieved_documents):
 
-collection = chroma_client.get_collection(
-    name="rag_documents"
-)
+    # Check retrieved documents
 
+    if not retrieved_documents:
 
-# STEP 4: Get user question
+        logger.warning("No documents available for generation")
 
-question = input("\nEnter your question: ").strip()
+        return "I don't have enough information in the provided documents."
 
-if not question:
-    raise ValueError("Please enter a question!")
 
+    # STEP 4: Prepare context
 
-# STEP 5: Convert question into embedding
+    context = "\n\n".join(retrieved_documents)
 
-embedding_response = client.models.embed_content(
-    model="gemini-embedding-001",
-    contents=question,
-    config=types.EmbedContentConfig(
-        task_type="RETRIEVAL_QUERY",
-        output_dimensionality=768
-    )
-)
 
-question_embedding = embedding_response.embeddings[0].values
+    # STEP 5: Create prompt
 
+    prompt = f"""
+    You are a helpful AI assistant.
 
-# STEP 6: Retrieve relevant documents
+    Answer the user's question using ONLY
+    the information provided in the context.
 
-results = collection.query(
-    query_embeddings=[question_embedding],
-    n_results=3
-)
+    Rules:
 
-retrieved_documents = results["documents"][0]
+    1. Do not invent information.
+    2. Use simple English.
+    3. If information is missing, say:
+       I don't have enough information in the provided documents.
 
-retrieved_sources = results["metadatas"][0]
+    CONTEXT:
 
+    {context}
 
-if not retrieved_documents:
-    print("\nNo relevant documents found.")
-    raise SystemExit
+    USER QUESTION:
 
+    {question}
 
-# STEP 7: Combine retrieved text into context
+    ANSWER:
+    """
 
-context = "\n\n".join(retrieved_documents)
 
+    # STEP 6: Generate answer with retry
 
-print("\n========== RETRIEVED CONTEXT ==========")
+    response = None
 
-print(context)
+    for attempt in range(3):
 
+        try:
 
-# STEP 8: Create prompt for Gemini
+            logger.info("Sending request to Gemini")
 
-prompt = f"""
-You are a helpful AI assistant.
+            response = client.models.generate_content(
+                model="gemini-3.8-flash",
+                contents=prompt
+            )
 
-Answer the user's question using ONLY the information
-provided in the context below.
+            logger.info("Gemini response received")
 
-If the answer is not available in the context,
-say: "I don't have enough information in the provided documents."
+            break
 
-Do not make up information.
+        except Exception:
 
-CONTEXT:
-{context}
+            logger.exception(
+                f"Gemini API attempt {attempt + 1} failed"
+            )
 
-USER QUESTION:
-{question}
+            if attempt < 2:
 
-Provide a clear and simple answer.
-"""
+                wait_time = 5 * (attempt + 1)
 
+                logger.warning(
+                    f"Retrying in {wait_time} seconds"
+                )
 
-# STEP 9: Send context and question to Gemini
+                time.sleep(wait_time)
 
-response = None
+            else:
 
-for attempt in range(3):
+                logger.error("All Gemini API attempts failed")
 
-    try:
+                return "Sorry, the AI service is currently unavailable."
 
-        print("\nConnecting to Gemini...")
 
-        response = client.models.generate_content(
-            model="gemini-3.8-flash",
-            contents=prompt
-        )
+    # STEP 7: Validate generated answer
 
-        print("Gemini response received!")
+    if response is None:
 
-        break
+        return "Answer generation failed."
 
-    except Exception as error:
 
-        print("\nGemini request failed:", error)
+    is_valid, result = validate_output(response.text)
 
-        if attempt < 2:
 
-            wait_time = 10 * (attempt + 1)
+    if not is_valid:
 
-            print(f"Retrying in {wait_time} seconds...")
+        logger.warning("Generated answer failed validation")
 
-            time.sleep(wait_time)
+        return "Sorry, a valid answer could not be generated."
 
-        else:
 
-            print("\nGemini is currently unavailable.")
-            print("Please try again later.")
+    logger.info("Answer generated and validated successfully")
 
-
-# STEP 10: Display AI answer
-
-print("\n========== AI GENERATED ANSWER ==========")
-
-if response is not None and response.text:
-
-    print(response.text)
-
-else:
-
-    print("AI answer could not be generated.")
-
-print("\n=========================================")
-
-
-# STEP 11: Display source documents
-
-print("\n========== SOURCE DOCUMENTS ==========")
-
-for source in retrieved_sources:
-
-    print("\nSource:", source["source"])
-
-    print("Chunk ID:", source["chunk_id"])
-
-
-print("\n======================================")
-
-print("\nRAG application completed!")
+    return result

@@ -1,13 +1,14 @@
 import os
-
 import chromadb
+
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
+from logger_config import logger
 
-# STEP 1: Load Gemini API key
 
+# Load API key
 load_dotenv()
 
 api_key = os.getenv("GEMINI_API_KEY")
@@ -16,13 +17,11 @@ if not api_key:
     raise ValueError("Gemini API key not found!")
 
 
-# STEP 2: Connect to Gemini
-
+# Connect to Gemini
 client = genai.Client(api_key=api_key)
 
 
-# STEP 3: Connect to ChromaDB
-
+# Connect to ChromaDB
 chroma_client = chromadb.PersistentClient(
     path="./chroma_db"
 )
@@ -32,48 +31,51 @@ collection = chroma_client.get_collection(
 )
 
 
-# STEP 4: Ask the user a question
+# Retrieval function
+def retrieve_documents(question):
 
-question = input("\nEnter your question: ")
+    try:
 
+        logger.info("Starting document retrieval")
 
-# STEP 5: Convert question into an embedding
+        # Generate question embedding
+        response = client.models.embed_content(
+            model="gemini-embedding-001",
+            contents=question,
+            config=types.EmbedContentConfig(
+                task_type="RETRIEVAL_QUERY",
+                output_dimensionality=768
+            )
+        )
 
-response = client.models.embed_content(
-    model="gemini-embedding-001",
-    contents=question,
-    config=types.EmbedContentConfig(
-        task_type="RETRIEVAL_QUERY",
-        output_dimensionality=768
-    )
-)
+        question_embedding = response.embeddings[0].values
 
-question_embedding = response.embeddings[0].values
+        logger.info("Question embedding generated")
 
+        # Search ChromaDB
+        results = collection.query(
+            query_embeddings=[question_embedding],
+            n_results=3
+        )
 
-# STEP 6: Search ChromaDB
+        documents = results["documents"][0]
 
-results = collection.query(
-    query_embeddings=[question_embedding],
-    n_results=3
-)
+        sources = results["metadatas"][0]
 
+        if not documents:
 
-# STEP 7: Display retrieved results
+            logger.warning("No relevant documents found")
 
-print("\n========== RETRIEVED RESULTS ==========")
+            return [], []
 
-for i in range(len(results["documents"][0])):
+        logger.info(
+            f"Retrieved {len(documents)} documents successfully"
+        )
 
-    print(f"\nResult {i + 1}")
+        return documents, sources
 
-    print("Source:", results["metadatas"][0][i]["source"])
+    except Exception:
 
-    print("Chunk ID:", results["metadatas"][0][i]["chunk_id"])
+        logger.exception("Document retrieval failed")
 
-    print("Text:", results["documents"][0][i])
-
-    print("Distance:", results["distances"][0][i])
-
-
-print("\n======================================")
+        raise
