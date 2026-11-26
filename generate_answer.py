@@ -114,18 +114,34 @@ def generate_answer(question, retrieved_documents):
 
     if response is None:
 
-        return "Answer generation failed."
+        logger.error("Gemini returned no response")
 
+        return "Sorry, answer generation failed."
 
-    is_valid, result = validate_output(response.text)
+    # Safely extract response text
 
+    try:
+
+        response_text = response.text
+
+    except Exception:
+
+        logger.exception("Failed to extract Gemini response text")
+
+        return "Sorry, an unexpected response was received."
+
+    # Validate generated answer
+
+    is_valid, result = validate_output(response_text)
 
     if not is_valid:
 
-        logger.warning("Generated answer failed validation")
+        logger.warning(
+            "Generated answer failed validation: %s",
+            result
+        )
 
         return "Sorry, a valid answer could not be generated."
-
 
     logger.info("Answer generated and validated successfully")
 

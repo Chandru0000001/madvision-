@@ -1,5 +1,9 @@
 def validate_output(answer):
 
+    # Check data type
+    if not isinstance(answer, str):
+        return False, "Generated response must be text."
+
     # Check whether response exists
     if answer is None:
         return False, "No response received from Gemini."
@@ -19,5 +23,4 @@ def validate_output(answer):
     if len(answer) > 5000:
         return False, "Generated answer is too long."
 
-    # Valid response
     return True, answer
